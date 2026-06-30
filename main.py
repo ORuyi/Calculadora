@@ -56,17 +56,18 @@ class Aplicacao:
         btn_subtracao.connect("clicked", self.definir_operacao, "-")
        
         btn1 = Gtk.Button(label="1")
-        btn6.connect("clicked", self.adicionar_valor, "1")
+        btn1.connect("clicked", self.adicionar_valor, "1")
         btn2 = Gtk.Button(label="2")
-        btn6.connect("clicked", self.adicionar_valor, "2")
+        btn2.connect("clicked", self.adicionar_valor, "2")
         btn3 = Gtk.Button(label="3")
-        btn6.connect("clicked", self.adicionar_valor, "3")
+        btn3.connect("clicked", self.adicionar_valor, "3")
         btn_multiplicacao = Gtk.Button(label="*")
         btn_multiplicacao.connect("clicked", self.definir_operacao, "*")
        
         btn0 = Gtk.Button(label="0")
         btn0.connect("clicked", self.adicionar_valor, "0")
         btn_igual = Gtk.Button(label="=")
+        btn_igual.connect("clicked", self.realizar_operacao)
         btn_divisao = Gtk.Button(label="/")
         btn_divisao.connect("clicked", self.definir_operacao, "/")
 
@@ -102,7 +103,7 @@ class Aplicacao:
 
         box_vert.add(barra_sup)
         box_vert.add(visor)
-        visor.add(self.visor)
+        visor.add(self.visor) 
         box_vert.add(botoes)
         barra_sup.add(bt_arquivo)
         barra_sup.add(bt_ajuda)
@@ -130,23 +131,56 @@ class Aplicacao:
                 self.visor.set_label(self.valor_atual)
     
     def definir_operacao(self, componente=None, dados=None):
+        self.numero1 = float(self.visor.get_text())
+        self.limpar_visor()
         info = dados 
         if info == "+":
             self.operacao = "soma"
+            self.visor.set_label("+")
         elif info == "-":
             self.operacao = "subtracao"
+            self.visor.set_label("-")
+
         elif info == "*":
             self.operacao = "multiplicação"
+            self.visor.set_label("*")
+
         elif info == "/":
             self.operacao = "divisão"
+            self.visor.set_label("/")
+
         elif info == "raiz":
             self.operacao = "raiz quadrada"
-
+            self.visor.set_label("\u221a")
 
         
-        
+
+    def realizar_operacao(self, componente=None, dados=None):
+        self.numero2 = float(self.visor.get_text())
+        self.limpar_visor()
+        resultado = 0
+
+        if self.operacao == "soma":
+            resultado = self.numero1 + self.numero2
+            self.visor.set_label(str(resultado))
+        elif self.operacao == "subtracao":
+            resultado = self.numero1 - self.numero2
+            self.visor.set_label(str(resultado))
+        elif self.operacao == "multiplicação":
+            resultado = self.numero1 * self.numero2
+            self.visor.set_label(str(resultado))
+        elif self.operacao == "divisão":
+            if self.numero2 != 0:
+                resultado = self.numero1 / self.numero2
+                self.visor.set_label(str(resultado))
+            else:
+                self.visor.set_label("Erro! Impossível divisão por 0.")
+            
+                    
     def limpar_visor(self, componente = None, dados = None):
         self.visor.set_label("0")
+        self.numero1 = 0
+        self.numero2 = 0
         self.valor_atual = "0"
 
     def sair(self, componente=None, dados=None):
