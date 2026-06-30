@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-import gi
+import gi, math
 
 gi.require_version("Gtk", "3.0")
 
@@ -13,7 +13,7 @@ class Aplicacao:
     def __init__(self):
         janela = Gtk.Window()
         janela.connect("delete-event", self.sair)
-        janela.set_title("Cores")
+        janela.set_title("Calculadora")
         janela.set_border_width(10)
         box_hor = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, homogeneous=False, spacing=10)
         box_vert = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, homogeneous=False, spacing=10)
@@ -116,49 +116,60 @@ class Aplicacao:
 
        # Funcionalidade do Código
        
-        self.valor_atual = "0"
+        self.valor_atual = ""
         self.operacao = ""
         self.numero1 = 0
         self.numero2 = 0
+        self.deve_reiniciar = False
     
     def adicionar_valor(self, componente=None, dados=None):
+        if self.deve_reiniciar or self.valor_atual in ["+", "-", "*", "/"]:            
+            self.valor_atual = ""
+            self.deve_reiniciar = False
+
         if len(self.valor_atual) <= 12:
-            if self.valor_atual == "0":
+            if self.valor_atual == "":
                 self.valor_atual = dados
-                self.visor.set_label(self.valor_atual)
             else:
                 self.valor_atual += dados
-                self.visor.set_label(self.valor_atual)
+            
+            self.visor.set_label(self.valor_atual)
     
     def definir_operacao(self, componente=None, dados=None):
         self.numero1 = float(self.visor.get_text())
-        self.limpar_visor()
+
         info = dados 
         if info == "+":
             self.operacao = "soma"
-            self.visor.set_label("+")
+            self.valor_atual = "+"
         elif info == "-":
             self.operacao = "subtracao"
-            self.visor.set_label("-")
-
+            self.valor_atual = "-"
         elif info == "*":
             self.operacao = "multiplicação"
-            self.visor.set_label("*")
-
+            self.valor_atual = "*"
         elif info == "/":
             self.operacao = "divisão"
-            self.visor.set_label("/")
-
+            self.valor_atual = "/"
         elif info == "raiz":
-            self.operacao = "raiz quadrada"
-            self.visor.set_label("\u221a")
+            self.operacao = "raiz"
+            self.realizar_operacao()
 
-        
+        self.visor.set_label(self.valor_atual)
+
+        self.deve_reiniciar = True
 
     def realizar_operacao(self, componente=None, dados=None):
         self.numero2 = float(self.visor.get_text())
-        self.limpar_visor()
         resultado = 0
+        if self.visor.get_text() in ["+", "-", "*", "/"]:
+            self.visor.set_label("Erro!")
+
+        if self.operacao == "raiz":
+            resultado = math.sqrt(self.numero1)
+            self.valor_atual = str(resultado)
+            self.visor.set_label(self.valor_atual)
+            self.operacao = "" 
 
         if self.operacao == "soma":
             resultado = self.numero1 + self.numero2
@@ -175,13 +186,14 @@ class Aplicacao:
                 self.visor.set_label(str(resultado))
             else:
                 self.visor.set_label("Erro! Impossível divisão por 0.")
+
             
                     
     def limpar_visor(self, componente = None, dados = None):
         self.visor.set_label("0")
+        self.deve_reiniciar = False
         self.numero1 = 0
         self.numero2 = 0
-        self.valor_atual = "0"
 
     def sair(self, componente=None, dados=None):
        Gtk.main_quit()
